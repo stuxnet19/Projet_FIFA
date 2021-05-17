@@ -13,33 +13,27 @@ import pandas as pd
 from scipy import stats
 from scipy.stats import randint
 
-# for data preparation and preprocessing for model
+# projetFifa
+
+
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from sklearn.feature_selection import RFE
+
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+from sklearn.cluster import KMeans
+
+from sklearn.decomposition import PCA
 from sklearn import preprocessing
-from sklearn.datasets import make_classification
-from sklearn.preprocessing import binarize, LabelEncoder, MinMaxScaler
+from sklearn.manifold import TSNE
 
-# models
-# Logistic Regression
-from sklearn.linear_model import LogisticRegression
-# Tree Classifier
-from sklearn.tree import DecisionTreeClassifier
-# Random Forest
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
-from sklearn.model_selection import RandomizedSearchCV
-# Bagging
-from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
-# KNN
-from sklearn.neighbors import KNeighborsClassifier
-# Naive Bayes
-from sklearn.naive_bayes import GaussianNB 
-# Stacking
-from mlxtend.classifier import StackingClassifier
-
-# model evaluation and validation 
-from sklearn import metrics
-from sklearn.metrics import accuracy_score, mean_squared_error, precision_recall_curve
-from sklearn.model_selection import cross_val_score
 
 # for db connection
 import sqlite3
@@ -52,8 +46,9 @@ model_filename="models/model.pkl"
 # to bypass warnings in the jupyter notebook
 import warnings
 from pandas.core.common import SettingWithCopyWarning
-warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
+
+warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 warnings.filterwarnings("ignore",category=UserWarning)
 warnings.filterwarnings("ignore",category=DeprecationWarning)
 warnings.filterwarnings("ignore",category=FutureWarning)
@@ -62,10 +57,24 @@ warnings.filterwarnings("ignore",category=PendingDeprecationWarning)
 app=Flask(__name__)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
+
+@app.route('/api/get_similar_players',methods=['GET'])
+def get_similar_players():
+	msg_data = {}
+	for k in request.args.keys():
+		val = request.args.get(k)
+		msg_data[k] = val
+	
+	return msg_data
+
+
+'''
+
 # instantiate index page
 @app.route("/")
 def index():
    	return render_template("index.html")
+
 
 # return model predictions
 @app.route("/api/predict", methods=["GET"])
@@ -87,7 +96,7 @@ def predict():
 	elif arr_results[0]==1:
 		treatment_likelihood="Yes"
 	return treatment_likelihood
-
+'''
 if __name__ == "__main_":
 	app.debug = False
 	from werkzeug.serving import run_simple
