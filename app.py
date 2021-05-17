@@ -67,8 +67,7 @@ def get_similar_players():
 	for k in request.args.keys():
 		val = request.args.get(k)
 		msg_data[k] = val
-	
-	return msg_data
+	return json.dumps(msg_data)
 
 
 '''
