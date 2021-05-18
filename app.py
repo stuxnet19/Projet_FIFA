@@ -1,21 +1,11 @@
 # web app packages
 import requests
 from flask import Flask, render_template, redirect, url_for, request,jsonify
-from werkzeug.wrappers import Request, Response
-
 import json
-
 # for data loading and transformation
 import numpy as np 
 import pandas as pd
-
-# for statistics output
-from scipy import stats
-from scipy.stats import randint
-
 # projetFifa
-
-
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
@@ -33,33 +23,22 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 from sklearn.manifold import TSNE
-
-
 # for db connection
 import sqlite3
-db_filename="database.db"
-
 # for saving/loading the ML model
 import pickle
+
+
+db_filename="database.db"
 model_filename="models/model.pkl"
-
-# to bypass warnings in the jupyter notebook
-import warnings
-from pandas.core.common import SettingWithCopyWarning
-
-
-warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-warnings.filterwarnings("ignore",category=UserWarning)
-warnings.filterwarnings("ignore",category=DeprecationWarning)
-warnings.filterwarnings("ignore",category=FutureWarning)
-warnings.filterwarnings("ignore",category=PendingDeprecationWarning)
-
+players_api = pd.read_csv('data/players_finessed.csv').set_index('Name')
+teams_api = pd.read_csv('data/Clubs_finessed.csv').set_index('Club')
 app=Flask(__name__)
-app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 @app.route("/")
 def index():
-   	return render_template("index.html")
+   	return "hello world"
+	#return render_template("index.html")
 
 @app.route('/api/get_similar_players',methods=['GET'])
 def get_similar_players():
@@ -67,7 +46,29 @@ def get_similar_players():
 	for k in request.args.keys():
 		val = request.args.get(k)
 		msg_data[k] = val
-	return json.dumps(msg_data)
+		# récupérer le modéle
+	
+	knn = pickle.load(open('models/similar_players_knn.pickle','rb'))
+	x = players_api.drop(columns=['Value']) 
+	similar_players = knn.kneighbors(X=x[x.index.str.contains(str(msg_data['player']))],n_neighbors=7)
+	similar_players_df = players_api.iloc[list(similar_players[1][0]),:]
+	var = similar_players_df.T.to_dict()
+	return var
+
+
+@app.route('/api/get_similar_teams',methods=['GET'])
+def get_similar_teams():
+	msg_data = {}
+	for k in request.args.keys():
+		val = request.args.get(k)
+		msg_data[k] = val
+		# récupérer le modéle
+	knn = pickle.load(open('models/similar_teams_knn.pickle','rb'))
+	similar_teams = knn.kneighbors(X=teams_api[teams_api.index.str.contains(str(msg_data['team']))],n_neighbors=10)
+	similar_teams_df = teams_api.iloc[list(similar_teams[1][0]),:]
+	var = similar_teams_df.T.to_dict()
+	return var
+
 
 
 '''
@@ -98,6 +99,9 @@ def predict():
 	return treatment_likelihood
 '''
 if __name__ == "__main_":
+	app.run()
+	'''
 	app.debug = False
 	from werkzeug.serving import run_simple
 	run_simple("localhost", 5000, app)
+	'''
