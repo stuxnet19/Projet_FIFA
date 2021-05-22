@@ -53,7 +53,7 @@ def get_similar_players():
 	similar_players = knn.kneighbors(X=x[x.index.str.contains(str(msg_data['player']))],n_neighbors=7)
 	similar_players_df = players_api.iloc[list(similar_players[1][0]),:]
 	var = similar_players_df.T.to_dict()
-	return var
+	return jsonify(var)
 
 
 @app.route('/api/get_similar_teams',methods=['GET'])
@@ -67,7 +67,7 @@ def get_similar_teams():
 	similar_teams = knn.kneighbors(X=teams_api[teams_api.index.str.contains(str(msg_data['team']))],n_neighbors=10)
 	similar_teams_df = teams_api.iloc[list(similar_teams[1][0]),:]
 	var = similar_teams_df.T.to_dict()
-	return var
+	return jsonify(var)
 
 
 
